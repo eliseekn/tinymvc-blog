@@ -1,6 +1,6 @@
 # tinymvc-blog
 
-Blog application sample made with with TinyMVC.
+Blog application sample made with TinyMVC.
 
 ## Requirements
 ```PHP v7.2 or greater```
