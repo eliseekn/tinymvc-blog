@@ -22,13 +22,14 @@ class Seeder
     /**
      * insert data in table
      *
-     * @param  string $table name of table
-     * @param  array $data data to insert
+     * @param  string $table
+     * @param  array $data
      * @return void
      */
-    public function insert(string $table, array $data): void
+    public static function insert(string $table, array $data): void
     {
-        $QB = new QueryBuilder();
-        $QB->insert($table, $data)->executeQuery();
+        Query::DB()
+            ->insert($table, $data)
+            ->executeQuery();
     }
 }

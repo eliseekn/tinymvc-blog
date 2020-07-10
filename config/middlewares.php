@@ -10,14 +10,14 @@
  * @link https://github.com/eliseekn/TinyMVC
  */
 
-use Framework\Core\Middleware;
+use Framework\Routing\Middleware;
 
 /**
- * Set routes paths
+ * Set middlewares names
  */
-Middleware::setName('CsrfTokenValidator', 'csrf_validator');
-Middleware::setName('CheckSessionToLogin', 'auth_session');
-Middleware::setName('CheckSessionToAdmin', 'admin_session');
-Middleware::setName('LoginInputValidator', 'auth_validator');
-Middleware::setName('CommentInputValidator', 'comment_validator');
-Middleware::setName('SanitizeInput', 'sanitize_input');
+
+Middleware::setName('CsrfProtection', 'csrf');
+Middleware::setName('SanitizeFields', 'sanitize');
+Middleware::setName('AdminPolicy', 'admin');
+Middleware::setName('RememberUser', 'remember');
+Middleware::setName('AuthenticationPolicy', 'auth');

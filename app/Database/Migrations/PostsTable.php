@@ -4,24 +4,27 @@ namespace App\Database\Migrations;
 
 use Framework\ORM\Migration;
 
-/**
- * PostsTable
- * 
- * Migration of Posts table
- */
-class PostsTable extends Migration
-{    
+class PostsTable
+{         
+    /**
+     * name of table
+     *
+     * @var string
+     */
+    protected static $table = 'posts';
+
     /**
      * create table
      *
      * @return void
      */
-    public function migrate(): void
+    public static function migrate(): void
     {
-        $this->table('posts')
-            ->addPrimaryKey('id')
+        Migration::table(self::$table)
+            ->addPrimaryKey()
             ->addString('title')
             ->addString('slug')
+            ->addInt('user_id')
             ->addString('image')
             ->addText('content')
             ->addTimestamp('created_at')
@@ -30,23 +33,13 @@ class PostsTable extends Migration
     }
     
     /**
-     * truncate table
-     *
-     * @return void
-     */
-    public function clear(): void
-    {
-        $this->truncateTable('posts');
-    }
-    
-    /**
      * drop table
      *
      * @return void
      */
-    public function delete(): void
+    public static function delete(): void
     {
-        $this->dropTable('posts');
+        Migration::dropTable(self::$table);
     }
     
     /**
@@ -54,9 +47,9 @@ class PostsTable extends Migration
      *
      * @return void
      */
-    public function rollBack(): void
+    public static function rollBack(): void
     {
-        $this->delete();
-        $this->migrate();
+        self::delete();
+        self::migrate();
     }
 }

@@ -3,12 +3,8 @@
 namespace App\Database\Models;
 
 use Framework\ORM\Model;
+use Framework\ORM\Query;
 
-/**
- * CommentsModel
- * 
- * Comments model class
- */
 class CommentsModel extends Model
 {    
     /**
@@ -16,26 +12,23 @@ class CommentsModel extends Model
      *
      * @var string
      */
-    protected $table = 'comments';
-
+    protected static $table = 'comments';
+    
     /**
-     * instantiates class
+     * findComments
      *
-     * @return void
+     * @return mixed
      */
-    public function __construct()
+    public static function findComments()
     {
-        parent::__construct($this->table);
-    }
-
-    /**
-     * get post row by slug
-     *
-     * @param  string $slug post slug
-     * @return void
-     */
-    public function get(int $post_id)
-    {
-        return $this->findAllWhere('post_id', '=', $post_id);
+        return Query::DB()
+            ->select(
+                'comments.*',
+                'posts.title AS post_title'
+            )
+            ->from(static::$table)
+            ->innerJoin('posts', 'comments.post_id', 'posts.id')
+            ->orderBy('comments.id', 'DESC')
+            ->fetchAll();
     }
 }

@@ -2,16 +2,10 @@
 
 namespace App\Controllers;
 
+use Framework\Routing\View;
 use App\Database\Models\PostsModel;
-use Framework\Core\Controller;
-use Framework\Http\Request;
 
-/**
- * HomeController
- * 
- * Home page controller
- */
-class HomeController extends Controller
+class HomeController
 {
 	/**
 	 * display home page
@@ -20,12 +14,8 @@ class HomeController extends Controller
 	 */
 	public function index(): void
 	{
-		$posts = new PostsModel();
-
-		$this->renderView('home', [
-			'page_title' => 'The Mount Everest Blog',
-			'page_description' => 'Blog about mountaineering',
-			'posts' => $posts->paginate(3)
+		View::render('index', [
+			'posts' => PostsModel::paginate(10)
 		]);
 	}
 }

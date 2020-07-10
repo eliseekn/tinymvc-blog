@@ -24,59 +24,140 @@ class Migration
 	 *
 	 * @var string
 	 */
-    private $query = '';
+    protected static $query = '';
     
     /**
      * execute sql query
      *
      * @return void
      */
-    private function executeQuery(): void
+    private static function executeQuery(): void
     {
-        $QB = new QueryBuilder();
-        $QB->setQuery($this->query);
-        $QB->executeQuery();
+        Query::DB()->setQuery(self::$query);
+        Query::DB()->executeQuery();
     }
 
     /**
      * generate CREATE TABLE query 
      *
      * @param  string $name name of table
-     * @return void
+     * @return mixed
      */
-    public function table(string $name)
+    public static function table(string $name)
     {
-        $this->query = "CREATE TABLE $name (";
-        return $this;
+        self::$query = "CREATE TABLE " . DB_PREFIX . "$name (";
+        return new self();
     }
     
     /**
      * generate primary key and autoincrement column query
      *
-     * @return void
+     * @param  string $name
+     * @return mixed
      */
-    public function addPrimaryKey(string $name) {
-        $this->query .= "$name INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ";
+    public function addPrimaryKey(string $name = 'id') {
+        self::$query .= "$name INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, ";
         return $this;
     }
 
     /**
      * add column of type integer
      *
-     * @return void
+     * @param  string $name
+     * @param  int $length
+     * @param  bool $null
+     * @param  bool $unique
+     * @param  int|null $default
+     * @return mixed
      */
-    public function addInteger(
+    public function addInt(
         string $name, 
-        int $size = 11, 
+        int $length = 11, 
         bool $null = false, 
         bool $unique = false, 
-        string $default = ''
+        ?int $default = null
     ) {
-        $this->query .= "$name INT($size)";
-        $this->query .= $null ? ' NULL' : ' NOT NULL';
-        $this->query .= $unique ? ' UNIQUE' : '';
-        $this->query .= empty($default) ? '' : " DEFAULT '$default'";
-        $this->query .= ', ';
+        self::$query .= "$name INT($length)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= $unique ? ' UNIQUE' : '';
+        self::$query .= is_null($default) ? '' : " DEFAULT $default";
+        self::$query .= ', ';
+
+        return $this;
+    }
+
+    /**
+     * add column of type small integer
+     *
+     * @param  string $name
+     * @param  int $length
+     * @param  bool $null
+     * @param  bool $unique
+     * @param  int|null $default
+     * @return mixed
+     */
+    public function addSmallInt(
+        string $name, 
+        int $length = 6, 
+        bool $null = false, 
+        bool $unique = false, 
+        ?int $default = null
+    ) {
+        self::$query .= "$name SMALLINT($length)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= $unique ? ' UNIQUE' : '';
+        self::$query .= is_null($default) ? '' : " DEFAULT $default";
+        self::$query .= ', ';
+
+        return $this;
+    }
+
+    /**
+     * add column of type big integer
+     *
+     * @param  string $name
+     * @param  int $length
+     * @param  bool $null
+     * @param  bool $unique
+     * @param  int|null $default
+     * @return mixed
+     */
+    public function addBigInt(
+        string $name, 
+        int $length = 20, 
+        bool $null = false, 
+        bool $unique = false, 
+        ?int $default = null
+    ) {
+        self::$query .= "$name BIGINT($length)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= $unique ? ' UNIQUE' : '';
+        self::$query .= is_null($default) ? '' : " DEFAULT $default";
+        self::$query .= ', ';
+
+        return $this;
+    }
+
+    /**
+     * add column of type char
+     *
+     * @param  string $name
+     * @param  bool $null
+     * @param  bool $unique
+     * @param  string|null $default
+     * @return mixed
+     */
+    public function addChar(
+        string $name, 
+        bool $null = false, 
+        bool $unique = false, 
+        ?string $default = null
+    ) {
+        self::$query .= "$name CHAR(1)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= $unique ? ' UNIQUE' : '';
+        self::$query .= is_null($default) ? '' : " DEFAULT '$default'";
+        self::$query .= ', ';
 
         return $this;
     }
@@ -84,20 +165,25 @@ class Migration
     /**
      * add column of type string
      *
-     * @return void
+     * @param  string $name
+     * @param  int $length
+     * @param  bool $null
+     * @param  bool $unique
+     * @param  string|null $default
+     * @return mixed
      */
     public function addString(
         string $name, 
-        int $size = 255, 
+        int $length = 255, 
         bool $null = false, 
         bool $unique = false, 
-        string $default = ''
+        ?string $default = null
     ) {
-        $this->query .= "$name VARCHAR($size)";
-        $this->query .= $null ? ' NULL' : ' NOT NULL';
-        $this->query .= $unique ? ' UNIQUE' : '';
-        $this->query .= empty($default) ? '' : " DEFAULT '$default'";
-        $this->query .= ', ';
+        self::$query .= "$name VARCHAR($length)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= $unique ? ' UNIQUE' : '';
+        self::$query .= is_null($default) ? '' : " DEFAULT '$default'";
+        self::$query .= ', ';
 
         return $this;
     }
@@ -105,17 +191,14 @@ class Migration
     /**
      * add column of type text
      *
-     * @return void
+     * @param  string $name
+     * @param  bool $null
+     * @return mixed
      */
-    public function addText(
-        string $name, 
-        bool $null = false, 
-        string $default = ''
-    ) {
-        $this->query .= "$name TEXT";
-        $this->query .= $null ? ' NULL' : ' NOT NULL';
-        $this->query .= empty($default) ? '' : " DEFAULT '$default'";
-        $this->query .= ', ';
+    public function addText(string $name, bool $null = false) {
+        self::$query .= "$name TEXT";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= ', ';
 
         return $this;
     }
@@ -123,17 +206,14 @@ class Migration
     /**
      * add column of type longtext
      *
-     * @return void
+     * @param  string $name
+     * @param  bool $null
+     * @return mixed
      */
-    public function addLongText(
-        string $name, 
-        bool $null = false, 
-        string $default = ''
-    ) {
-        $this->query .= "$name LONGTEXT";
-        $this->query .= $null ? ' NULL' : ' NOT NULL';
-        $this->query .= empty($default) ? '' : " DEFAULT '$default'";
-        $this->query .= ', ';
+    public function addLongText(string $name, bool $null = false) {
+        self::$query .= "$name LONGTEXT";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= ', ';
 
         return $this;
     }
@@ -141,17 +221,37 @@ class Migration
     /**
      * add column of type timestamp
      *
-     * @return void
+     * @param  string $name
+     * @param  bool $null
+     * @param  string $default
+     * @return mixed
      */
     public function addTimestamp(
         string $name, 
         bool $null = false, 
         string $default = 'CURRENT_TIMESTAMP'
     ) {
-        $this->query .= "$name TIMESTAMP";
-        $this->query .= $null ? ' NULL' : ' NOT NULL';
-        $this->query .= empty($default) ? '' : " DEFAULT $default";
-        $this->query .= ', ';
+        self::$query .= "$name TIMESTAMP";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= empty($default) ? '' : " DEFAULT $default";
+        self::$query .= ', ';
+
+        return $this;
+    }
+
+    /**
+     * add column of type boolean
+     *
+     * @param  string $name
+     * @param  bool $null
+     * @param  int|null $default
+     * @return mixed
+     */
+    public function addBoolean(string $name, bool $null = false, ?int $default = null) {
+        self::$query .= "$name TINYINT(1)";
+        self::$query .= $null ? ' NULL' : ' NOT NULL';
+        self::$query .= is_null($default) ? '' : " DEFAULT '$default'";
+        self::$query .= ', ';
 
         return $this;
     }
@@ -163,9 +263,9 @@ class Migration
      */
     public function create(): void
     {
-        $this->query = rtrim($this->query, ', ');
-        $this->query .= ')';
-        $this->executeQuery();
+        self::$query = rtrim(self::$query, ', ');
+        self::$query .= ')';
+        self::executeQuery();
     }
 
     /**
@@ -174,21 +274,9 @@ class Migration
      * @param  string $name name of table
      * @return void
      */
-    public function dropTable(string $name): void
+    public static function dropTable(string $name): void
     {
-        $this->query = "DROP TABLE IF EXISTS $name";
-        $this->executeQuery();
-    }
-
-    /**
-     * truncate table if exists
-     *
-     * @param  string $name name of table
-     * @return void
-     */
-    public function truncateTable(string $name): void
-    {
-        $this->query = "TRUNCATE $name";
-        $this->executeQuery();
+        self::$query = "DROP TABLE IF EXISTS " . DB_PREFIX . "$name";
+        self::executeQuery();
     }
 }

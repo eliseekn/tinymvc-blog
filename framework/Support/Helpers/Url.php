@@ -14,25 +14,42 @@
  * Miscellaneous URL utils functions
  */
 
-/**
- * generate abosulte url
- *
- * @param  string $url controller and actions names
- * @return string returns absolute url
- */
-function absolute_url(string $url): string
-{
-	return WEB_DOMAIN . $url;
+if (!function_exists('absolute_url')) {
+	/**
+	 * generate abosulte url
+	 *
+	 * @param  string $url
+	 * @return string
+	 */
+	function absolute_url(string $url): string
+	{
+		return WEB_DOMAIN . $url;
+	}
 }
 
-/**
- * redirect to another location
- *
- * @param  mixed $location controller and actions names
- * @return void
- */
-function redirect_to(string $location): void
-{
-	header('Location: ' . absolute_url($location));
-	exit();
+if (!function_exists('redirect_to')) {
+	/**
+	 * redirect to another location
+	 *
+	 * @param  string $location
+	 * @return void
+	 */
+	function redirect_to(string $location): void
+	{
+		header('Location: ' . absolute_url($location));
+		exit();
+	}
+}
+
+if (!function_exists('current_url')) {
+	/**
+	 * get current url
+	 *
+	 * @return string
+	 * @link   https://stackoverflow.com/questions/6768793/get-the-full-url-in-php#6768831
+	 */
+	function current_url(): string
+	{
+		return 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . "{$_SERVER['HTTP_HOST']}/{$_SERVER['REQUEST_URI']}";
+	}
 }

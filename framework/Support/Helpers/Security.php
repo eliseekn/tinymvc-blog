@@ -14,68 +14,77 @@
  * Miscellaneous security utils functions
  */
 
-/**
- * sanitize html and other scripting language
- *
- * @param  string $str string to sanitize
- * @return string returns sanitized string
- */
-function sanitize_string(string $str): string
-{
-    $sanitized_str = stripslashes($str);
-    $sanitized_str = strip_tags($sanitized_str);
-    $sanitized_str = htmlentities($sanitized_str);
-    return $sanitized_str;
-}
-
-/**
- * hash string with password_hash() PHP function
- *
- * @param  string $str string to be hashed
- * @return string returns hashed string
- */
-function hash_string(string $str): string
-{
-    return password_hash($str, PASSWORD_DEFAULT);
-}
-
-/**
- * compare hashed string with password_verify() PHP function
- *
- * @param  string $str string to be compared
- * @param  string $hash hashed string 
- * @return bool returns true or false
- */
-function compare_hash(string $str, string $hash): bool
-{
-    return password_verify($str, $hash);
-}
-
-/**
- * generate crsf token
- *
- * @return string returns token value
- */
-function generate_csrf_token(): string
-{
-    $csrf_token = bin2hex(random_bytes(32));
-    create_session('csrf_token', $csrf_token);
-
-    return '<input type="hidden" name="csrf_token" value="' . $csrf_token . '">';
-}
-
-/**
- * check if crsf token is valid
- *
- * @param  string $csrf_token token value
- * @return bool
- */
-function is_valid_csrf_token(string $csrf_token): bool
-{
-    if (hash_equals(get_session('csrf_token'), $csrf_token)) {
-        close_session('csrf_token');
-        return true;
+if (!function_exists('escape')) {
+	/**
+     * escape html and others scripting languages
+     *
+     * @param  string $str
+     * @return string
+     */
+    function escape(string $str): string
+    {
+        $str = stripslashes($str);
+        $str = strip_tags($str);
+        $str = htmlspecialchars($str);
+        return $str;
     }
+}
 
-    return false;
+if (!function_exists('hash_string')) {
+	/**
+     * hash string with password_hash() PHP function
+     *
+     * @param  string $str string to be hashed
+     * @return string
+     */
+    function hash_string(string $str): string
+    {
+        return password_hash($str, PASSWORD_DEFAULT);
+    }
+}
+
+if (!function_exists('compare_hash')) {
+    /**
+     * compare hashed string with password_verify() PHP function
+     *
+     * @param  string $str
+     * @param  string $hash hashed string 
+     * @return bool
+     */
+    function compare_hash(string $str, string $hash): bool
+    {
+        return password_verify($str, $hash);
+    }
+}
+
+if (!function_exists('generate_csrf_token')) {
+    /**
+     * generate crsf token
+     *
+     * @return string returns html input with token value
+     */
+    function generate_csrf_token(): string
+    {
+        if (session_has('csrf_token')) {
+            $csrf_token = get_session('csrf_token');
+        } else {
+            $csrf_token = bin2hex(random_bytes(32));
+            create_session('csrf_token', $csrf_token);
+        }
+
+        return '<input type="hidden" name="csrf_token" value="' . $csrf_token . '">';
+    }
+}
+
+if (!function_exists('is_valid_csrf_token')) {
+    /**
+     * check if crsf token is valid
+     *
+     * @param  string $csrf_token token value
+     * @return bool
+     */
+    function is_valid_csrf_token(string $csrf_token): bool
+    {
+        return hash_equals(get_session('csrf_token'), $csrf_token);
+    }
 }

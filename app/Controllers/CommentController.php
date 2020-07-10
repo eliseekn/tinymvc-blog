@@ -2,36 +2,31 @@
 
 namespace App\Controllers;
 
+use Framework\HTTP\Request;
+use Framework\HTTP\Redirect;
+use App\Validators\CommentForm;
 use App\Database\Models\CommentsModel;
-use Framework\Http\Request;
-use Framework\Core\Controller;
-use Framework\Http\Redirect;
 
-class CommentController extends Controller
+class CommentController
 {
-    public function __construct()
-    {
-        $this->comments = new CommentsModel();
-    }
+	/**
+	 * add comment to post
+	 *
+	 * @param  int $post_id
+	 * @return void
+	 */
+	public function add(int $post_id): void
+	{
+		CommentForm::validate([
+			'redirect' => 'back'
+		]);
 
-    public function add(int $post_id)
-    {
-        $request = new Request();
-        $author = $request->getInput('author');
-        $content = $request->getInput('content');
-        
-        $this->comments->setData([
-            'post_id' => $post_id,
-            'author' => $author,
-            'content' => $content
-        ])->save();
+		CommentsModel::insert([
+			'email' => Request::getField('email'),
+			'comment' => Request::getField('comment'),
+			'post_id' => $post_id
+		]);
 
-        Redirect::back()->only();
-    }
-
-    public function delete(int $id)
-    {
-        $this->comments->delete($id);
-        Redirect::back()->only();
-    }
+		Redirect::back()->withSuccess('Your comment has been added successfully.');
+	}
 }

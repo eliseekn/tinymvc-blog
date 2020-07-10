@@ -14,58 +14,63 @@
  * Cookies management functions
  */
 
-/**
- * create cookie and set data
- *
- * @param  string $name cookie name
- * @param  string $value cookie value content
- * @return bool returns true or false
- */
-function create_cookie(string $name, string $value): bool
-{
-	$secure = isset($_SERVER['HTTPS']);
-	$expire = time() + (3600 * 24 * 30); //1 month
-
-	return setcookie(
-		$name, //name
-		$value, //value
-		$expire, //expire
-		'/', //path
-		WEB_DOMAIN, //domain
-		$secure, //is secure?
-		true //HTTP only
-	);
+if (!function_exists('create_cookie')) {
+	/**
+	 * create cookie and set value
+	 *
+	 * @param  string $name
+	 * @param  string $value
+	 * @param  int $expires in seconds (default 1 hour)
+	 * @param  string $domain
+	 * @param  bool $secure
+	 * @return bool
+	 */
+	function create_cookie(
+		string $name,
+		string $value,
+		int $expires = 3600,
+		string $domain = '',
+		bool $secure = false
+	): bool {
+		return setcookie($name, $value, time() + $expires, '/', $domain, $secure, true);
+	}
 }
 
-/**
- * return cookie data
- *
- * @param  string $name cookie name
- * @return void
- */
-function get_cookie(string $name)
-{
-	return $_COOKIE[$name] ?? '';
+if (!function_exists('get_cookie')) {
+	/**
+	 * return cookie value
+	 *
+	 * @param  string $name
+	 * @return string
+	 */
+	function get_cookie(string $name): string
+	{
+		return $_COOKIE[$name] ?? '';
+	}
 }
 
-/**
- * check if cookie exists
- *
- * @param  string $name cookie name
- * @return bool returns true or false
- */
-function cookie_has(string $name): bool
-{
-	return isset($_COOKIE[$name]);
+if (!function_exists('cookie_has')) {
+	/**
+	 * check if cookie exists
+	 *
+	 * @param  string $name
+	 * @return bool
+	 */
+	function cookie_has(string $name): bool
+	{
+		return isset($_COOKIE[$name]);
+	}
 }
 
-/**
- * delete cookie by name
- *
- * @param  string $name cookie name
- * @return void
- */
-function delete_cookie(string $name)
-{
-	unset($_COOKIE[$name]);
+if (!function_exists('delete_cookie')) {
+	/**
+	 * delete cookie by name
+	 *
+	 * @param  string $name
+	 * @return void
+	 */
+	function delete_cookie(string $name): bool
+	{
+		return setcookie($name, '', time() - 3600, '/');
+	}
 }

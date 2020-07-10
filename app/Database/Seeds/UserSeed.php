@@ -2,30 +2,29 @@
 
 namespace App\Database\Seeds;
 
-use Faker\Factory;
 use Framework\ORM\Seeder;
 
-/**
- * UserSeed
- * 
- * Insert new user row
- */
-class UserSeed extends Seeder
-{
+class UserSeed
+{     
     /**
-     * insert user row
+     * name of table
+     *
+     * @var string
+     */
+    protected static $table = 'users';
+
+    /**
+     * insert row
      *
      * @return void
      */
-    public function sow(): void
+    public static function insert(): void
     {
-        $faker = Factory::create('en_US');
-
-        $this->insert('users', [
-            'name' => $faker->name,
-            'email' => $faker->email,
+        Seeder::insert(self::$table, [
+            'name' => 'Admin',
+            'email' => 'admin@mail.com',
             'password' => hash_string('admin'),
-            'role' => 'administrator'
+            'role' => 'admin'
         ]);
     }
 }

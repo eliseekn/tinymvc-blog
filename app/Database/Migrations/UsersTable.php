@@ -4,38 +4,32 @@ namespace App\Database\Migrations;
 
 use Framework\ORM\Migration;
 
-/**
- * UsersTable
- * 
- * Migration of Users table
- */
-class UsersTable extends Migration
-{    
+class UsersTable
+{         
+    /**
+     * name of table
+     *
+     * @var string
+     */
+    protected static $table = 'users';
+
     /**
      * create table
      *
      * @return void
      */
-    public function migrate(): void
+    public static function migrate(): void
     {
-        $this->table('users')
-            ->addPrimaryKey('id')
+        Migration::table(self::$table)
+            ->addPrimaryKey()
             ->addString('name')
-            ->addString('email')
+            ->addString('email', 255, false, true)
             ->addString('password')
-            ->addString('role')
+            ->addString('role', 255, false, false, 'user')
+            ->addBoolean('online', false, 0)
             ->addTimestamp('created_at')
+            ->addTimestamp('updated_at')
             ->create();
-    }
-    
-    /**
-     * truncate table
-     *
-     * @return void
-     */
-    public function clear(): void
-    {
-        $this->truncateTable('users');
     }
     
     /**
@@ -43,9 +37,9 @@ class UsersTable extends Migration
      *
      * @return void
      */
-    public function delete(): void
+    public static function delete(): void
     {
-        $this->dropTable('users');
+        Migration::dropTable(self::$table);
     }
     
     /**
@@ -53,9 +47,9 @@ class UsersTable extends Migration
      *
      * @return void
      */
-    public function rollBack(): void
+    public static function rollBack(): void
     {
-        $this->delete();
-        $this->migrate();
+        self::delete();
+        self::migrate();
     }
 }

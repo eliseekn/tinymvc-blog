@@ -27,14 +27,14 @@ class Database
 	 * 
 	 * @var mixed
 	 */
-	private static $instance = null;
+	protected static $instance = null;
 
 	/**
 	 * database connection instance
 	 *
 	 * @var mixed
 	 */
-	private $connection;
+	protected $connection;
 
 	/**
 	 * create instance of database connection
@@ -50,11 +50,11 @@ class Database
 
 			$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-			$this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+			$this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 			$this->connection->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
 		} catch (PDOException $e) {
 			if (DISPLAY_ERRORS == true) {
-				die($e->getMessage()); //display error if connection failed
+				die($e->getMessage());
 			}
 		}
 	}

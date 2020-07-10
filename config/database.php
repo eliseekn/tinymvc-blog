@@ -30,4 +30,7 @@ define('DB_USERNAME', 'root');
 define('DB_PASSWORD', 'eliseekn');
 
 //database name 
-define('DB_NAME', 'test');
+define('DB_NAME', 'blog');
+
+//database tables prefix
+define('DB_PREFIX', '');

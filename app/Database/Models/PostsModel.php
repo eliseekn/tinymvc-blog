@@ -3,12 +3,10 @@
 namespace App\Database\Models;
 
 use Framework\ORM\Model;
+use Framework\ORM\Query;
+use Framework\HTTP\Request;
+use Framework\Support\Pager;
 
-/**
- * PostsModel
- * 
- * Posts model class
- */
 class PostsModel extends Model
 {    
     /**
@@ -16,26 +14,53 @@ class PostsModel extends Model
      *
      * @var string
      */
-    protected $table = 'posts';
-
+    protected static $table = 'posts';
+    
     /**
-     * instantiates class
+     * findPosts
      *
-     * @return void
+     * @return mixed
      */
-    public function __construct()
+    public static function findPosts()
     {
-        parent::__construct($this->table);
+        return Query::DB()
+            ->select(
+                'posts.*',
+                'users.name AS author_name'
+            )
+            ->from(static::$table)
+            ->innerJoin('users', 'posts.user_id', 'users.id')
+            ->orderBy('posts.id', 'DESC')
+            ->fetchAll();
     }
-
+    
     /**
-     * get post row by slug
+     * paginatePosts
      *
-     * @param  string $slug post slug
-     * @return void
+     * @param  int $items_per_pages
+     * @return mixed new pager class instance
      */
-    public function get(string $slug)
+    public static function paginatePosts(int $items_per_pages): Pager
     {
-        return $this->findSingle('slug', '=', $slug);
+        $page = empty(Request::getQuery('page')) ? 1 : Request::getQuery('page');
+
+        $total_items = Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->count();
+
+        $pagination = generate_pagination($page, $total_items, $items_per_pages);
+
+        $items = Query::DB()
+            ->select(
+                'posts.*',
+                'users.name AS author_name'
+            )
+            ->from(static::$table)
+            ->innerJoin('users', 'posts.user_id', 'users.id')
+            ->orderBy('posts.title', 'DESC')
+            ->fetchAll();
+
+        return new Pager($items, $pagination);
     }
 }

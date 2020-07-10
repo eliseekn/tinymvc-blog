@@ -4,38 +4,30 @@ namespace App\Database\Migrations;
 
 use Framework\ORM\Migration;
 
-/**
- * CommentsTable
- * 
- * Migration of comments table
- */
-class CommentsTable extends Migration
-{    
+class CommentsTable
+{         
+    /**
+     * name of table
+     *
+     * @var string
+     */
+    protected static $table = 'comments';
+
     /**
      * create table
      *
      * @return void
      */
-    public function migrate(): void
+    public static function migrate(): void
     {
-        $this->table('comments')
-            ->addPrimaryKey('id')
-            ->addInteger('post_id')
-            ->addString('author')
-            ->addText('content')
+        Migration::table(self::$table)
+            ->addPrimaryKey()
+            ->addInt('post_id')
+            ->addString('email')
+            ->addText('comment')
             ->addTimestamp('created_at')
             ->addTimestamp('updated_at')
             ->create();
-    }
-    
-    /**
-     * truncate table
-     *
-     * @return void
-     */
-    public function clear(): void
-    {
-        $this->truncateTable('comments');
     }
     
     /**
@@ -43,9 +35,9 @@ class CommentsTable extends Migration
      *
      * @return void
      */
-    public function delete(): void
+    public static function delete(): void
     {
-        $this->dropTable('comments');
+        Migration::dropTable(self::$table);
     }
     
     /**
@@ -53,9 +45,9 @@ class CommentsTable extends Migration
      *
      * @return void
      */
-    public function rollBack(): void
+    public static function rollBack(): void
     {
-        $this->delete();
-        $this->migrate();
+        self::delete();
+        self::migrate();
     }
 }

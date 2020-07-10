@@ -12,8 +12,8 @@
 
 namespace Framework\ORM;
 
-use Framework\Http\Request;
-use Framework\Support\Paginator;
+use Framework\HTTP\Request;
+use Framework\Support\Pager;
 
 /**
  * Model
@@ -21,124 +21,84 @@ use Framework\Support\Paginator;
  * Simplify use of query builder
  */
 class Model
-{    
+{
     /**
      * name of table
      *
      * @var string
      */
-    protected $table = ''; 
-    
-    /**
-     * data to insert or update in table
-     *
-     * @var array
-     */
-    protected $data = [];
-    
-    /**
-     * query builder instance
-     *
-     * @var mixed
-     */
-    protected $QB;
-    
-    /**
-     * request instance variable
-     *
-     * @var mixed
-     */
-    protected $request;
+    protected static $table = '';
 
     /**
-     * instantiates class
+     * find row by column id
      *
-     * @return void
+     * @param  int $id
+     * @return mixed
      */
-    public function __construct(string $table)
+    public static function find(int $id)
     {
-        $this->QB = new QueryBuilder();
-        $this->table = $table;
-        $this->request = new Request();
+        return self::findWhere('id', $id);
     }
-    
+
     /**
-     * find row by id column
+     * check if row exists
      *
-     * @param  mixed $id
-     * @return void
+     * @param  string $column
+     * @param  string $value
+     * @return bool
      */
-    public function find(int $id)
+    public static function exists(string $column, string $value): bool
     {
-        return $this->findSingle('id', '=', $id);
+        return isset(self::findWhere($column, $value)->$column);
     }
     
     /**
      * fetch single row
      *
-     * @param  string $column name of column
-     * @param  string $operator operator
-     * @param  string $value value to check
-     * @return void
+     * @param  string $column
+     * @param  string $value
+     * @return mixed
      */
-    public function findSingle(string $column, string $operator, string $value)
+    public static function findWhere(string $column, string $value)
     {
-        return (object) $this->QB->select('*')
-            ->from($this->table)
-            ->where($column, $operator, $value)
+        return Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->whereEquals($column, $value)
             ->fetchSingle();
     }
 
     /**
      * fetch all rows
      *
-     * @param  string $direction DESC or ASC
-     * @return void
+     * @param  array $order (ASC or DESC)
+     * @return mixed
      */
-    public function findAll(string $direction = 'DESC')
+    public static function findAll(array $order = ['id', 'DESC'])
     {
-        $items = $this->QB->select('*')
-            ->from($this->table)
-            ->orderBy('id', $direction)
+        return Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->orderBy($order[0], $order[1])
             ->fetchAll();
-
-        //convert array to class
-        $items = array_map(
-            function ($val) {
-                return (object) $val;
-            },
-            (array) $items
-        );
-
-        return (object) $items;
     }
 
     /**
      * find rows with where clause
      *
-     * @param  string $column name of column
-     * @param  string $operator operator
-     * @param  string $value value to check
-     * @param  string $direction DESC or ASC
-     * @return void
+     * @param  string $column
+     * @param  string $value
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed
      */
-    public function findAllWhere(string $column, string $operator, string $value, string $direction = 'DESC')
+    public static function findAllWhere(string $column, string $value, array $order_by = ['id', 'DESC'])
     {
-        $items = $this->QB->select('*')
-            ->from($this->table)
-            ->where($column, $operator, $value)
-            ->orderBy('id', $direction)
+        return Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->whereEquals($column, $value)
+            ->orderBy($order_by[0], $order_by[1])
             ->fetchAll();
-
-        //convert array to class
-        $items = array_map(
-            function ($val) {
-                return (object) $val;
-            },
-            (array) $items
-        );
-
-        return (object) $items;
     }
 
     /**
@@ -146,26 +106,29 @@ class Model
      *
      * @param  int $limit
      * @param  int $offset
-     * @param  string $direction DESC or ASC
-     * @return void
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed
      */
-    public function findRange(int $limit, int $offset, string $direction = 'DESC')
+    public static function findRange(int $limit, int $offset, array $order_by = ['id', 'DESC'])
     {
-        $items = $this->QB->select('*')
-            ->from($this->table)
-            ->orderBy('id', $direction)
+        return Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->orderBy($order_by[0], $order_by[1])
             ->limit($limit, $offset)
             ->fetchAll();
-        
-        //convert array to class
-        $items = array_map(
-            function ($val) {
-                return (object) $val;
-            },
-            (array) $items
-        );
+    }
 
-        return (object) $items;
+    /**
+     * find range rows
+     *
+     * @param  int $limit
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed
+     */
+    public static function findFirstOf(int $limit, array $order_by = ['id', 'DESC'])
+    {
+        return self::findRange(0, $limit, $order_by);
     }
 
     /**
@@ -173,36 +136,58 @@ class Model
      *
      * @param  int $limit
      * @param  int $offset
-     * @param  string $column name of column
-     * @param  string $operator operator
-     * @param  string $value value to check
-     * @param  string $direction DESC or ASC
-     * @return void
+     * @param  string $column
+     * @param  string $value
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed
      */
-    public function findRangeWhere(
+    public static function findRangeWhere(
         int $limit,
         int $offset,
         string $column,
-        string $operator,
         string $value,
-        string $direction = 'DESC'
+        array $order_by = ['id', 'DESC']
     ) {
-        $items = $this->QB->select('*')
-            ->from($this->table)
-            ->where($column, $operator, $value)
-            ->orderBy('id', $direction)
+        return Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->whereEquals($column, $value)
+            ->orderBy($order_by[0], $order_by[1])
             ->limit($limit, $offset)
             ->fetchAll();
-        
-        //convert array to class
-        $items = array_map(
-            function ($val) {
-                return (object) $val;
-            },
-            (array) $items
-        );
+    }
 
-        return (object) $items;
+    /**
+     * find range rows with where clause
+     *
+     * @param  int $limit
+     * @param  string $column
+     * @param  string $value
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed
+     */
+    public static function findFirstOfWhere(
+        int $limit,
+        string $column,
+        string $value,
+        array $order_by = ['id', 'DESC']
+    ) {
+        return self::findRangeWhere(0, $limit, $column, $value, $order_by);
+    }
+    
+    /**
+     * delete row with WHERE clause
+     *
+     * @param  string $column
+     * @param  string $value
+     * @return void
+     */
+    public static function deleteWhere(string $column, string $value): void
+    {
+        Query::DB()
+            ->deleteFrom(static::$table)
+            ->whereEquals($column, $value)
+            ->executeQuery();
     }
     
     /**
@@ -211,108 +196,113 @@ class Model
      * @param  int $id row id
      * @return void
      */
-    public function delete(int $id): void
+    public static function delete(int $id): void
     {
-        $this->QB->deleteFrom($this->table)
-            ->where('id', '=', $id)
-            ->limit(1)
+        self::deleteWhere('id', $id);
+    }
+    
+    /**
+     * update data with where clause
+     *
+     * @param  string $column
+     * @param  string $value
+     * @param  array $data
+     * @return void
+     */
+    public static function updateWhere(string $column, string $value, array $data): void
+    {
+        Query::DB()
+            ->update(static::$table)
+            ->set($data)
+            ->whereEquals($column, $value)
             ->executeQuery();
     }
     
     /**
-     * set data to update or insert
+     * update data
      *
-     * @param  array $data data value
+     * @param  int $id
+     * @param  array $data
      * @return void
      */
-    public function setData(array $data)
+    public static function update(int $id, array $data): void
     {
-        $this->data = $data;
-        return $this;
+        self::updateWhere('id', $id, $data);
     }
     
     /**
-     * update 
+     * insert data
      *
-     * @param  int $id row id
+     * @param  array $data data to insert
      * @return void
      */
-    public function update(int $id): void
+    public static function insert(array $data): void
     {
-        $this->QB->update($this->table)
-            ->set($this->data)
-            ->where('id', '=', $id)
-            ->executeQuery();
-    }
-    
-    /**
-     * save
-     *
-     * @return void
-     */
-    public function save(): void
-    {
-        $this->QB->insert($this->table, $this->data)
+        Query::DB()
+            ->insert(static::$table, $data)
             ->executeQuery();
     }
     
     /**
      * generate pagination
      *
-     * @param  mixed $page current page
      * @param  mixed $items_per_pages
-     * @return mixed returns paginator class
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed returns new pager class instance
      */
-    public function paginate(int $items_per_pages)
+    public static function paginate(int $items_per_pages, array $order_by = ['id', 'DESC']): Pager
     {
-        $page = empty($this->request->getQuery('page')) ? 1 : (int) $this->request->getQuery('page');
+        $page = empty(Request::getQuery('page')) ? 1 : Request::getQuery('page');
 
-        $total_items = $this->QB->select('*')
-            ->from($this->table)
-            ->rowsCount();
+        $total_items = Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->count();
 
         $pagination = generate_pagination($page, $total_items, $items_per_pages);
 
         $items = $items_per_pages > 0 ? 
-            $this->findRange($pagination['first_item'], $items_per_pages) :
-            $this->findAll();
+            self::findRange($pagination['first_item'], $items_per_pages, $order_by) :
+            self::findAll($order_by);
 
-        return new Paginator($items, $pagination);
+        return new Pager($items, $pagination);
     }
 
     /**
      * generate pagination with where clause
      *
      * @param  int $items_per_pages
-     * @param  string $column name of column
-     * @param  string $operator operator
-     * @param  string $value value to check
-     * @return mixed returns new paginator class
+     * @param  string $column
+     * @param  string $value
+     * @param  array $order_by (ASC or DESC)
+     * @return mixed returns new pager class instance
      */
-    public function paginateWhere(
+    public static function paginateWhere(
         int $items_per_pages,
         string $column,
-        string $operator,
-        string $value
-    ) {
-        $page = empty($this->request->getQuery('page')) ? 1 : (int) $this->request->getQuery('page');
+        string $value,
+        array $order_by = ['id', 'DESC']
+    ): Pager {
+        $page = empty(Request::getQuery('page')) ? 1 : Request::getQuery('page');
 
-        $total_items = $this->QB->select('*')
-            ->from($this->table)
-            ->rowsCount();
+        $total_items = Query::DB()
+            ->select('*')
+            ->from(static::$table)
+            ->whereEquals($column, $value)
+            ->count();
 
         $pagination = generate_pagination($page, $total_items, $items_per_pages);
 
         $items = $items_per_pages > 0 ? 
-            $this->findRangeWhere(
-                $items_per_pages,
+            self::findRangeWhere(
                 $pagination['first_item'],
+                $items_per_pages,
                 $column,
-                $operator,
-                $value
+                $value,
+                $order_by
             ) : 
-            $this->findAllWhere($column, $operator, $value);
+            self::findAllWhere($column, $value, $order_by);
 
-        return new Paginator($items, $pagination);
+        return new Pager($items, $pagination);
     }
 }
