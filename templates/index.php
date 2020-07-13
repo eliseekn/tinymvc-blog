@@ -21,9 +21,9 @@
                 
                 <div class="card-body">
                     <h2 class="card-title post-title"><?= $post->title ?></h2>
-                    <p class="card-text mt-3 text-justify">
+                    <div class="card-text mt-3">
                         <?= truncate($post->content, 290); ?>
-                    </p>
+                    </div>
                     <a href="<?= absolute_url('/post/' . $post->slug) ?>" class="btn btn-lg btn-dark read-more">Read more</a>
                 </div>
             </div>

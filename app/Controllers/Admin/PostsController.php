@@ -50,27 +50,27 @@ class PostsController
 		]);
 
 		if (PostsModel::exists('slug', slugify(Request::getField('title')))) {
-			Redirect::back()->withError('Failed to create post. This post already exists in database.');
+			create_flash_message('error', 'Failed to create post. This post already exists in database.');
 		}
 
 		$image = Request::getFile('image', ['jpg', 'jpeg', 'png', 'bmp']);
 
 		if (!$image->isUploaded()) {
-			Redirect::back()->withError('Failed to upload post image to storage.');
+			create_flash_message('error', 'Failed to upload post image to storage.');
 		}
 		
 		if (!$image->isAllowed()) {
-			Redirect::back()->withError('Invalid image format. Format authorized: ' . implode(', ', $image->allowed_extensions));
+			create_flash_message('error', 'Invalid image format. Format authorized: ' . implode(', ', $image->allowed_extensions));
 		}
 
 		if (!Storage::isDir('uploads/posts/images')) {
 			if (!Storage::createDir('uploads/posts/images', true)) {
-				Redirect::back()->withError('Failed to create posts images storage.');
+				create_flash_message('error', 'Failed to create posts images storage.');
 			}
 		}
 
 		if (!$image->moveTo('uploads/posts/images')) {
-			Redirect::back()->withError('Failed to move post image to storage.');
+			create_flash_message('error', 'Failed to move post image to storage.');
 		}
 
 	    PostsModel::insert([
@@ -81,7 +81,7 @@ class PostsController
 			'image' => $image->filepath
         ]);
 
-        Redirect::back()->withSuccess('The post has been created successfully.');
+        create_flash_message('success', 'The post has been created successfully.');
     }
     
 	/**
@@ -97,7 +97,7 @@ class PostsController
 		]);
 
 		if (!PostsModel::exists('id', $id)) {
-			Redirect::back()->withError('Failed to update post. This post does not exists in database.');
+			create_flash_message('error', 'Failed to update post. This post does not exists in database.');
 		}
 
 		$data = [
@@ -111,28 +111,28 @@ class PostsController
 
 		if ($image->isUploaded()) {
 			if (!$image->isAllowed()) {
-				Redirect::back()->withError('Invalid image file. Only allowed image in format ' . implode(', ', $image->allowed_extensions));
+				create_flash_message('error', 'Invalid image file. Only allowed image in format ' . implode(', ', $image->allowed_extensions));
 			}
 
 			if (!Storage::isDir('uploads/posts/images')) {
 				if (!Storage::createDir('uploads/posts/images', true)) {
-					Redirect::back()->withError('Failed to create posts images storage.');
+					create_flash_message('error', 'Failed to create posts images storage.');
 				}
 			}
 
 			if (!$image->moveTo('uploads/posts/images')) {
-				Redirect::back()->withError('Failed to move post image to storage.');
+				create_flash_message('error', 'Failed to move post image to storage.');
 			}
 
 			if (!Storage::deleteFile(PostsModel::find($id)->image)) {
-				Redirect::back()->withError('Failed to delete old post image from storage');
+				create_flash_message('error', 'Failed to delete old post image from storage');
 			}
 			
 			$data['image'] = $image->filepath;
 		}
 
 		PostsModel::update($id, $data);
-        Redirect::back()->withSuccess('The post has been updated successfully.');
+        create_flash_message('success', 'The post has been updated successfully.');
     }
 
 	/**

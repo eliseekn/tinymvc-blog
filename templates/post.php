@@ -54,7 +54,7 @@
 
         <div class="card-body">
             <h2 class="card-title post-title"><?= $post->title ?></h2>
-            <p class="card-text mt-3 text-justify"><?= $post->content ?></p>
+            <div class="card-text mt-3"><?= $post->content ?></div>
             <a href="<?= absolute_url('/') ?>" class="btn btn-lg btn-dark">Go back home</a>
         </div>
     </article>

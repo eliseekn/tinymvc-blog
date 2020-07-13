@@ -51,7 +51,7 @@ endif
         <h3 class="mb-0 text-white">Edit post</h3>
     </div>
 
-    <form method="post" action="<?= absolute_url('/admin/posts/update/' . $post->id) ?>">
+    <form id="update-post" data-url="<?= absolute_url('/admin/posts/update/' . $post->id) ?>">
         
         <?= generate_csrf_token() ?>
 
@@ -64,9 +64,9 @@ endif
             </div>
 
             <div class="form-group row">
-                <label for="content" class="col-sm-2 col-form-label">Content</label>
-                <div class="col-sm-10">
-                    <textarea name="content" id="content" class="form-control" rows="5"><?= $post->content ?></textarea>
+                <label for="editor" class="col-sm-2 col-form-label">Content</label>
+                <div class="col-sm-10 mb-5">
+                    <div id="editor"><?= $post->content ?></div>
                 </div>
             </div>
 
